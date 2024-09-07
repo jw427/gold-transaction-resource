@@ -175,4 +175,30 @@ public class OrderService {
         // 결과값 반환
         return orderDetailResponseDto;
     }
+
+    // 주문 삭제
+    @Transactional
+    public void deleteOrder(Long orderId) {
+        // 주문 식별번호로 Order 객체 찾기
+        Order order = orderRepository.findByOrderId(orderId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.ORDER_NOT_FOUND));
+        // 주문 상태가 입금 또는 송금이 완료된 상태일 경우 삭제 불가 - 주문만 한 상태이거나 배송까지 완료됐을 때는 삭제 가능
+        if(order.getOrderStatus() == OrderStatus.PAYMENT_COMPLETED || order.getOrderStatus() == OrderStatus.PAYMENT_SENT)
+            throw new BadRequestException(ErrorCode.ORDER_DELETE_FAILED);
+        // 주문 상태가 주문 완료(주문만 한 상태)이고, OrderType = PURCHASE(구매)인 경우
+        if(order.getOrderStatus() == OrderStatus.ORDER_COMPLETED && order.getOrderType() == OrderType.PURCHASE) {
+            // order의 금 종류로 product 찾기
+            Product product = productRepository.findByGoldType(order.getProduct().getGoldType())
+                    .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_NOT_FOUND));
+            // 상품 재고 증가
+            product.increaseProductStock(order.getQuantity());
+        }
+
+        // 연관된 배송 삭제
+        deliveryRepository.deleteAllByOrder(order);
+        // 연관된 결제 삭제
+        paymentRepository.deleteAllByOrder(order);
+        // 주문 삭제
+        orderRepository.delete(order);
+    }
 }
