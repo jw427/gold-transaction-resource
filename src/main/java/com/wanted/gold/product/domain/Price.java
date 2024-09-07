@@ -1,5 +1,6 @@
 package com.wanted.gold.product.domain;
 
+import com.wanted.gold.order.domain.OrderType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -22,7 +23,7 @@ public class Price {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private PriceType priceType;
+    private OrderType orderType;
 
     @Column(nullable = false)
     private Long pricePerGram;
