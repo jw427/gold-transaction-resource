@@ -48,4 +48,11 @@ public class OrderController {
         OrderDetailResponseDto responseDto = orderService.getOrder(orderId);
         return ResponseEntity.ok().body(responseDto);
     }
+
+    // 주문 삭제
+    @DeleteMapping("/{orderId}")
+    public ResponseEntity<Void> deleteOrder(@PathVariable Long orderId) {
+        orderService.deleteOrder(orderId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }

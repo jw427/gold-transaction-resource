@@ -30,4 +30,9 @@ public class Product {
         this.stock = this.stock.subtract(quantity);
         return this;
     }
+
+    public Product increaseProductStock(BigDecimal quantity) {
+        this.stock = this.stock.add(quantity);
+        return this;
+    }
 }
