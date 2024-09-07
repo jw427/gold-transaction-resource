@@ -5,6 +5,8 @@ import com.wanted.gold.exception.ErrorCode;
 import com.wanted.gold.exception.NotFoundException;
 import com.wanted.gold.order.domain.*;
 import com.wanted.gold.order.dto.CreateOrderRequestDto;
+import com.wanted.gold.order.dto.OrderListPaginationResponseDto;
+import com.wanted.gold.order.dto.OrderListResponseDto;
 import com.wanted.gold.order.repository.DeliveryRepository;
 import com.wanted.gold.order.repository.OrderRepository;
 import com.wanted.gold.order.repository.PaymentRepository;
@@ -13,10 +15,19 @@ import com.wanted.gold.product.domain.Product;
 import com.wanted.gold.product.repository.PriceRepository;
 import com.wanted.gold.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -82,5 +93,45 @@ public class OrderService {
         BigDecimal totalPriceDecimal = quantity.multiply(priceDecimal);
         // 소수점 아래 버리고 Long 타입으로 변환
         return totalPriceDecimal.longValue();
+    }
+
+    // 주문 전체 목록 조회
+    @Transactional(readOnly = true)
+    public OrderListPaginationResponseDto<OrderListResponseDto> getOrders(LocalDate date, OrderType type, int offset, int limit) {
+        // 페이지 번호 offset과 한 페이지당 출력 개수인 limit
+        Pageable pageable = PageRequest.of(offset, limit);
+        Page<Order> orders = orderRepository.findByCreatedAtDateAndAndOrderType(date, type, pageable);
+        // dto 변환
+        List<OrderListResponseDto> orderListResponseDtoList = orders.stream()
+                .map(list -> new OrderListResponseDto(list.getOrderStatus(), list.getTotalPrice(), list.getQuantity(), list.getUpdatedAt(), list.getProduct().getGoldType()))
+                .collect(Collectors.toList());
+        // 페이지 링크 추가한 response로 변환
+        OrderListPaginationResponseDto<OrderListResponseDto> paginationResponseDto = new OrderListPaginationResponseDto<>(
+                true,
+                "Success to search orders",
+                orderListResponseDtoList,
+                getPaginationLinks(orders, date, type)
+        );
+        return paginationResponseDto;
+    }
+
+    public Map<String, String> getPaginationLinks(Page<Order> page, LocalDate date, OrderType type) {
+        Map<String, String> links = new HashMap<>();
+        // 현재 페이지 번호와 페이지 크기
+        int currentPage = page.getNumber();
+        int pageSize = page.getSize();
+
+        // 다음 페이지 링크
+        if(page.hasNext()) {
+            links.put("next", String.format("/orders?date=%s&type=%s&offset=%d&limit=%d",
+                    date, type, currentPage + 1, pageSize));
+        }
+        // 이전 페이지 링크
+        if(page.hasPrevious()) {
+            links.put("prev", String.format("/orders?date=%s&type=%s&offset=%d&limit=%d",
+                    date, type, currentPage - 1, pageSize));
+        }
+
+        return links;
     }
 }
