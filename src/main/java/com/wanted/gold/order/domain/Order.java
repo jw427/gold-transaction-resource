@@ -4,8 +4,6 @@ import com.wanted.gold.product.domain.Product;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -38,10 +36,8 @@ public class Order {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal quantity;
 
-    @CreatedDate
     private LocalDateTime createdAt;
 
-    @LastModifiedDate
     private LocalDateTime updatedAt;
 
     private UUID userId;

@@ -3,10 +3,7 @@ package com.wanted.gold.order.service;
 import com.wanted.gold.exception.BadRequestException;
 import com.wanted.gold.exception.ErrorCode;
 import com.wanted.gold.exception.NotFoundException;
-import com.wanted.gold.order.domain.Delivery;
-import com.wanted.gold.order.domain.Order;
-import com.wanted.gold.order.domain.OrderType;
-import com.wanted.gold.order.domain.Payment;
+import com.wanted.gold.order.domain.*;
 import com.wanted.gold.order.dto.CreateOrderRequestDto;
 import com.wanted.gold.order.repository.DeliveryRepository;
 import com.wanted.gold.order.repository.OrderRepository;
@@ -19,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -49,13 +47,16 @@ public class OrderService {
         // 주문 생성
         Order order = Order.builder()
                 .orderType(requestDto.orderType())
+                .orderStatus(OrderStatus.ORDER_COMPLETED)
                 .totalPrice(totalPrice)
                 .quantity(requestDto.quantity())
+                .createdAt(LocalDateTime.now())
                 .product(product)
                 .build();
         orderRepository.save(order);
         // 배송 생성
         Delivery delivery = Delivery.builder()
+                .deliveryStatus(DeliveryStatus.PENDING)
                 .address(requestDto.address())
                 .recipientName(requestDto.recipientName())
                 .recipientPhone(requestDto.recipientPhone())
@@ -64,6 +65,7 @@ public class OrderService {
         deliveryRepository.save(delivery);
         // 결제 생성
         Payment payment = Payment.builder()
+                .paymentStatus(PaymentStatus.PENDING)
                 .paymentAmount(totalPrice)
                 .bankName(requestDto.bankName())
                 .bankAccount(requestDto.bankAccount())

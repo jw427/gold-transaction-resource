@@ -3,13 +3,14 @@ package com.wanted.gold.order.dto;
 import com.wanted.gold.order.domain.OrderType;
 import com.wanted.gold.product.domain.GoldType;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 
 public record CreateOrderRequestDto(
-        @NotBlank OrderType orderType,
-        @NotBlank BigDecimal quantity,
-        @NotBlank GoldType goldType,
+        @NotNull OrderType orderType,
+        @NotNull BigDecimal quantity,
+        @NotNull GoldType goldType,
         @NotBlank String address,
         @NotBlank String recipientName,
         @NotBlank String recipientPhone,
