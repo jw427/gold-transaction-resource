@@ -151,7 +151,7 @@ public class OrderService {
         );
         // 주문 식별번호로 Payment 객체 찾기
         Payment payment = paymentRepository.findTopByOrder_OrderIdOrderByPaymentIdDesc(orderId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.PAYMENT_NOT_FOUNT));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.PAYMENT_NOT_FOUND));
         // Payment -> PaymentResponseDto로 변환
         PaymentResponseDto paymentResponseDto = new PaymentResponseDto(
                 payment.getPaymentStatus(),

@@ -45,4 +45,10 @@ public class Order {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
+
+    public Order updateOrderStatusAndTime(OrderStatus orderStatus) {
+        this.orderStatus = orderStatus;
+        this.updatedAt = LocalDateTime.now();
+        return this;
+    }
 }

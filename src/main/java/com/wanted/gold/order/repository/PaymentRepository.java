@@ -12,4 +12,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
     // 주문에 해당하는 결제 정보 삭제
     void deleteAllByOrder(Order order);
+
+    // 결제 식별번호로 결제 찾기
+    Optional<Payment> findByPaymentId(Long paymentId);
 }

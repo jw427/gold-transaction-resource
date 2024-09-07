@@ -37,4 +37,10 @@ public class Payment {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
+
+    public Payment updatePaymentStatusAndTime(PaymentStatus paymentStatus) {
+        this.paymentStatus = paymentStatus;
+        this.paymentAt = LocalDateTime.now();
+        return this;
+    }
 }
