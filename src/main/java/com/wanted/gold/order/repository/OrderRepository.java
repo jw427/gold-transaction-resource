@@ -9,10 +9,15 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
+    // 날짜와 주문 유형으로 페이지네이션 활용해 주문 조회
     @Query("SELECT o FROM Order o WHERE DATE(o.createdAt) = :date AND o.orderType = :type")
     Page<Order> findByCreatedAtDateAndAndOrderType(@Param("date") LocalDate date,
                                                    @Param("type") OrderType type,
                                                    Pageable pageable);
+
+    // 주문 식별번호로 해당하는 주문 조회
+    Optional<Order> findByOrderId(Long orderId);
 }
