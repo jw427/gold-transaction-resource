@@ -25,4 +25,9 @@ public class Product {
 
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal stock;
+
+    public Product deductProductStock(BigDecimal quantity) {
+        this.stock = this.stock.subtract(quantity);
+        return this;
+    }
 }
