@@ -4,9 +4,7 @@ import com.wanted.gold.exception.BadRequestException;
 import com.wanted.gold.exception.ErrorCode;
 import com.wanted.gold.exception.NotFoundException;
 import com.wanted.gold.order.domain.*;
-import com.wanted.gold.order.dto.CreateOrderRequestDto;
-import com.wanted.gold.order.dto.OrderListPaginationResponseDto;
-import com.wanted.gold.order.dto.OrderListResponseDto;
+import com.wanted.gold.order.dto.*;
 import com.wanted.gold.order.repository.DeliveryRepository;
 import com.wanted.gold.order.repository.OrderRepository;
 import com.wanted.gold.order.repository.PaymentRepository;
@@ -133,5 +131,48 @@ public class OrderService {
         }
 
         return links;
+    }
+
+    // 주문 상세 조회
+    public OrderDetailResponseDto getOrder(Long orderId) {
+        // 주문 식별번호로 Order 객체 찾기
+        Order order = orderRepository.findByOrderId(orderId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.ORDER_NOT_FOUND));
+        // 주문 식별번호로 Delivery 객체 찾기
+        Delivery delivery = deliveryRepository.findTopByOrder_OrderIdOrderByDeliveryIdDesc(orderId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.DELIVERY_NOT_FOUND));
+        // Delivery -> DeliveryResponseDto로 변환
+        DeliveryResponseDto deliveryResponseDto = new DeliveryResponseDto(
+                delivery.getDeliveryStatus(),
+                delivery.getDeliveryAt(),
+                delivery.getAddress(),
+                delivery.getRecipientName(),
+                delivery.getRecipientPhone()
+        );
+        // 주문 식별번호로 Payment 객체 찾기
+        Payment payment = paymentRepository.findTopByOrder_OrderIdOrderByPaymentIdDesc(orderId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.PAYMENT_NOT_FOUNT));
+        // Payment -> PaymentResponseDto로 변환
+        PaymentResponseDto paymentResponseDto = new PaymentResponseDto(
+                payment.getPaymentStatus(),
+                payment.getPaymentAt(),
+                payment.getPaymentAmount(),
+                payment.getBankName(),
+                payment.getBankAccount()
+        );
+        // OrderDetailResponseDto로 변환
+        OrderDetailResponseDto orderDetailResponseDto = new OrderDetailResponseDto(
+                order.getOrderType(),
+                order.getOrderStatus(),
+                order.getTotalPrice(),
+                order.getQuantity(),
+                order.getCreatedAt(),
+                order.getUpdatedAt(),
+                order.getProduct().getGoldType(),
+                deliveryResponseDto,
+                paymentResponseDto
+        );
+        // 결과값 반환
+        return orderDetailResponseDto;
     }
 }

@@ -12,6 +12,13 @@ public enum ErrorCode {
 
     // 주문
     QUANTITY_TOO_MANY(HttpStatus.BAD_REQUEST, "주문할 수 없는 수량입니다. 수량을 다시 확인해주세요."),
+    ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "주문을 찾을 수 없습니다. 다시 시도해주세요."),
+
+    // 배송
+    DELIVERY_NOT_FOUND(HttpStatus.NOT_FOUND, "배송 정보를 찾을 수 없습니다."),
+
+    // 결제
+    PAYMENT_NOT_FOUNT(HttpStatus.NOT_FOUND, "결제 정보를 찾을 수 없습니다."),
 
     // 상품
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "상품을 찾을 수 없습니다. 다시 시도해주세요."),

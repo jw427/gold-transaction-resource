@@ -3,6 +3,7 @@ package com.wanted.gold.order.controller;
 import com.wanted.gold.order.domain.Order;
 import com.wanted.gold.order.domain.OrderType;
 import com.wanted.gold.order.dto.CreateOrderRequestDto;
+import com.wanted.gold.order.dto.OrderDetailResponseDto;
 import com.wanted.gold.order.dto.OrderListPaginationResponseDto;
 import com.wanted.gold.order.dto.OrderListResponseDto;
 import com.wanted.gold.order.service.OrderService;
@@ -39,5 +40,12 @@ public class OrderController {
         if(orderPage.data().size() == 0)
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         return ResponseEntity.ok().body(orderPage);
+    }
+
+    // 주문 상세 조회
+    @GetMapping("/{orderId}")
+    public ResponseEntity<OrderDetailResponseDto> getOrder(@PathVariable Long orderId) {
+        OrderDetailResponseDto responseDto = orderService.getOrder(orderId);
+        return ResponseEntity.ok().body(responseDto);
     }
 }
