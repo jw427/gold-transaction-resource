@@ -1,12 +1,10 @@
 package com.wanted.gold.order.controller;
 
+import com.wanted.gold.order.dto.ModifyDeliveryRequestDto;
 import com.wanted.gold.order.service.DeliveryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/deliveries")
@@ -18,6 +16,13 @@ public class DeliveryController {
     @PatchMapping("/{deliveryId}/complete")
     public ResponseEntity<String> completeDelivery(@PathVariable Long deliveryId) {
         String response = deliveryService.completeDelivery(deliveryId);
+        return ResponseEntity.ok().body(response);
+    }
+
+    // 배송 정보 수정
+    @PatchMapping("/{deliveryId}")
+    public ResponseEntity<String> modifyDelivery(@PathVariable Long deliveryId, @RequestBody ModifyDeliveryRequestDto requestDto) {
+        String response = deliveryService.modifyDelivery(deliveryId, requestDto);
         return ResponseEntity.ok().body(response);
     }
 }
