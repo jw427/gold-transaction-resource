@@ -1,12 +1,10 @@
 package com.wanted.gold.order.controller;
 
+import com.wanted.gold.order.dto.ModifyPaymentRequestDto;
 import com.wanted.gold.order.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/payments")
@@ -18,6 +16,13 @@ public class PaymentController {
     @PatchMapping("/{paymentId}/complete")
     public ResponseEntity<String> completePayment(@PathVariable Long paymentId) {
         String response = paymentService.completePayment(paymentId);
+        return ResponseEntity.ok().body(response);
+    }
+
+    // 결제 정보 수정
+    @PatchMapping("/{paymentId}")
+    public ResponseEntity<String> modifyPayment(@PathVariable Long paymentId, @RequestBody ModifyPaymentRequestDto requestDto) {
+        String response = paymentService.modifyPayment(paymentId, requestDto);
         return ResponseEntity.ok().body(response);
     }
 }

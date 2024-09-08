@@ -1,9 +1,11 @@
 package com.wanted.gold.order.service;
 
+import com.wanted.gold.exception.BadRequestException;
 import com.wanted.gold.exception.ConflictException;
 import com.wanted.gold.exception.ErrorCode;
 import com.wanted.gold.exception.NotFoundException;
 import com.wanted.gold.order.domain.*;
+import com.wanted.gold.order.dto.ModifyPaymentRequestDto;
 import com.wanted.gold.order.repository.PaymentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -44,5 +46,26 @@ public class PaymentService {
             throw new ConflictException(ErrorCode.PAYMENT_FAILED);
         }
         return message;
+    }
+
+    @Transactional
+    public String modifyPayment(Long paymentId, ModifyPaymentRequestDto requestDto) {
+        // 결제 식별번호로 payment 객체 찾기
+        Payment payment = paymentRepository.findByPaymentId(paymentId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.PAYMENT_NOT_FOUND));
+        // 결제가 완료된 상태에서는 수정 불가
+        if(payment.getPaymentStatus() != PaymentStatus.PENDING)
+            throw new ConflictException(ErrorCode.PAYMENT_MODIFY_FAILED);
+        // 은행 이름과 계좌번호 둘 다 빈값일 경우 수정 불가
+        if(requestDto.bankName().isBlank() && requestDto.bankAccount().isBlank())
+            throw new BadRequestException(ErrorCode.INVALID_PAYMENT_INFORMATION);
+        payment.modifyPayment(
+                // 입력받은 은행 이름이 없을 경우 기존의 은행 이름
+                !requestDto.bankName().isBlank() ? requestDto.bankName() : payment.getBankName(),
+                // 입력받은 계좌번호가 없을 경우 기존의 계좌번호
+                !requestDto.bankAccount().isBlank() ? requestDto.bankAccount() : payment.getBankAccount()
+        );
+        // 결제 정보 수정 성공 메시지 반환
+        return "결제 정보 수정을 완료했습니다.";
     }
 }

@@ -43,4 +43,10 @@ public class Payment {
         this.paymentAt = LocalDateTime.now();
         return this;
     }
+
+    public Payment modifyPayment(String bankName, String bankAccount) {
+        this.bankName = bankName;
+        this.bankAccount = bankAccount;
+        return this;
+    }
 }
