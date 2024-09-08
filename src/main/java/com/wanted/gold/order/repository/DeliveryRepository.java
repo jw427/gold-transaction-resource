@@ -12,4 +12,7 @@ public interface DeliveryRepository extends JpaRepository<Delivery, Long> {
 
     // 주문에 해당하는 배송 정보 삭제
     void deleteAllByOrder(Order order);
+
+    // 배송 식별번호로 배송 찾기
+    Optional<Delivery> findByDeliveryId(Long deliveryId);
 }

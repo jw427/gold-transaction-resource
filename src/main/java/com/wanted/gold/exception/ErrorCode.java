@@ -17,6 +17,7 @@ public enum ErrorCode {
 
     // 배송
     DELIVERY_NOT_FOUND(HttpStatus.NOT_FOUND, "배송 정보를 찾을 수 없습니다."),
+    DELIVERY_FAILED(HttpStatus.CONFLICT, "배송을 진행할 수 없습니다. 다시 시도해주세요."),
 
     // 결제
     PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "결제 정보를 찾을 수 없습니다."),
