@@ -1,9 +1,11 @@
 package com.wanted.gold.order.service;
 
+import com.wanted.gold.exception.BadRequestException;
 import com.wanted.gold.exception.ConflictException;
 import com.wanted.gold.exception.ErrorCode;
 import com.wanted.gold.exception.NotFoundException;
 import com.wanted.gold.order.domain.*;
+import com.wanted.gold.order.dto.ModifyDeliveryRequestDto;
 import com.wanted.gold.order.repository.DeliveryRepository;
 import com.wanted.gold.product.domain.Product;
 import lombok.RequiredArgsConstructor;
@@ -49,5 +51,28 @@ public class DeliveryService {
             throw new ConflictException(ErrorCode.DELIVERY_FAILED);
         }
         return message;
+    }
+
+    @Transactional
+    public String modifyDelivery(Long deliveryId, ModifyDeliveryRequestDto requestDto) {
+        // 배송 식별번호로 delivery 객체 찾기
+        Delivery delivery = deliveryRepository.findByDeliveryId(deliveryId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.DELIVERY_NOT_FOUND));
+        // 배송이 완료된 상태에서는 수정 불가
+        if(delivery.getDeliveryStatus() != DeliveryStatus.PENDING)
+            throw new ConflictException(ErrorCode.DELIVERY_MODIFY_FAILED);
+        // 주소, 수령인 이름, 전화번호 모두 빈값일 경우 수정 불가
+        if(requestDto.address().isBlank() && requestDto.recipientName().isBlank() && requestDto.recipientPhone().isBlank())
+            throw new BadRequestException(ErrorCode.INVALID_DELIVERY_INFORMATION);
+        delivery.modifyDelivery(
+                // 입력받은 주소가 없을 경우 기존 주소
+                !requestDto.address().isBlank() ? requestDto.address() : delivery.getAddress(),
+                // 입력받은 수령인 이름이 없을 경우 기존 수령인 이름
+                !requestDto.recipientName().isBlank() ? requestDto.recipientName() : delivery.getRecipientName(),
+                // 입력받은 전화번호가 없을 경우 기존 전화번호
+                !requestDto.recipientPhone().isBlank() ? requestDto.recipientPhone() : delivery.getRecipientPhone()
+        );
+        // 배송 정보 수정 성공 메시지 반환
+        return "배송 정보 수정을 완료했습니다.";
     }
 }

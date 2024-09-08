@@ -43,4 +43,11 @@ public class Delivery {
         this.deliveryAt = LocalDateTime.now();
         return this;
     }
+
+    public Delivery modifyDelivery(String address, String recipientName, String recipientPhone) {
+        this.address = address;
+        this.recipientName = recipientName;
+        this.recipientPhone = recipientPhone;
+        return this;
+    }
 }
