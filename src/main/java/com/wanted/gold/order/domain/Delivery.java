@@ -37,4 +37,10 @@ public class Delivery {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
+
+    public Delivery updateDeliveryStatusAndTime(DeliveryStatus deliveryStatus) {
+        this.deliveryStatus = deliveryStatus;
+        this.deliveryAt = LocalDateTime.now();
+        return this;
+    }
 }

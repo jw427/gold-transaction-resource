@@ -1,6 +1,6 @@
 package com.wanted.gold.order.controller;
 
-import com.wanted.gold.order.service.PaymentService;
+import com.wanted.gold.order.service.DeliveryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -9,15 +9,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/payments")
+@RequestMapping("/api/deliveries")
 @RequiredArgsConstructor
-public class PaymentController {
-    private final PaymentService paymentService;
+public class DeliveryController {
+    private final DeliveryService deliveryService;
 
-    // 결제 상태 수정 - 입금 완료 또는 송금 완료
-    @PatchMapping("/{paymentId}/complete")
-    public ResponseEntity<String> completePayment(@PathVariable Long paymentId) {
-        String response = paymentService.completePayment(paymentId);
+    // 배송 상태 수정 - 발송 완료 또는 수령 완료
+    @PatchMapping("/{deliveryId}/complete")
+    public ResponseEntity<String> completeDelivery(@PathVariable Long deliveryId) {
+        String response = deliveryService.completeDelivery(deliveryId);
         return ResponseEntity.ok().body(response);
     }
 }
