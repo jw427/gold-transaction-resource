@@ -22,6 +22,7 @@ public enum ErrorCode {
     // 결제
     PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "결제 정보를 찾을 수 없습니다."),
     PAYMENT_FAILED(HttpStatus.CONFLICT, "결제를 진행할 수 없습니다. 다시 시도해주세요."),
+    PAYMENT_MODIFY_FAILED(HttpStatus.CONFLICT, "결제 정보를 수정할 수 없습니다. 다시 시도해주세요."),
 
     // 상품
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "상품을 찾을 수 없습니다. 다시 시도해주세요."),
