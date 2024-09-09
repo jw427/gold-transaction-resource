@@ -24,8 +24,11 @@ public class OrderController {
 
     // 주문 생성
     @PostMapping("")
-    public ResponseEntity<String> createOrder(@Valid @RequestBody CreateOrderRequestDto requestDto) {
-        String response = orderService.createOrder(requestDto);
+    public ResponseEntity<String> createOrder(@RequestHeader(value = "Authorization") String token, @Valid @RequestBody CreateOrderRequestDto requestDto) {
+        if(token == null || !token.startsWith("Bearer "))
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효하지 않은 접근입니다.");
+        String accessToken = token.split("Bearer ")[1];
+        String response = orderService.createOrder(accessToken, requestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
