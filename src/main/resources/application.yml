@@ -16,3 +16,7 @@ spring:
 
 server:
   port: 9999
+
+grpc:
+  server:
+    port: 50052

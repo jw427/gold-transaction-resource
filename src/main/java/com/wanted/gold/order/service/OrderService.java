@@ -1,5 +1,6 @@
 package com.wanted.gold.order.service;
 
+import com.wanted.gold.client.AuthGrpcClient;
 import com.wanted.gold.exception.BadRequestException;
 import com.wanted.gold.exception.ErrorCode;
 import com.wanted.gold.exception.NotFoundException;
@@ -25,6 +26,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,9 +37,15 @@ public class OrderService {
     private final PriceRepository priceRepository;
     private final ProductRepository productRepository;
     private final PaymentRepository paymentRepository;
+    private final AuthGrpcClient authGrpcClient;
 
     // 주문 생성
-    public String createOrder(CreateOrderRequestDto requestDto) {
+    @Transactional
+    public String createOrder(String accessToken, CreateOrderRequestDto requestDto) {
+        // 액세스토큰으로 회원 식별번호 가져오기
+        String userIdStr = authGrpcClient.getUserId(accessToken);
+        // String -> UUID 변환
+        UUID userId = UUID.fromString(userIdStr);
         // 입력받은 금 종류로 product 찾기
         Product product = productRepository.findByGoldType(requestDto.goldType())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_NOT_FOUND));
@@ -60,6 +68,7 @@ public class OrderService {
                 .totalPrice(totalPrice)
                 .quantity(requestDto.quantity())
                 .createdAt(LocalDateTime.now())
+                .userId(userId)
                 .product(product)
                 .build();
         orderRepository.save(order);
