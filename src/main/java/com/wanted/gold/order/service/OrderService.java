@@ -1,6 +1,7 @@
 package com.wanted.gold.order.service;
 
 import com.wanted.gold.client.AuthGrpcClient;
+import com.wanted.gold.client.dto.UserResponseDto;
 import com.wanted.gold.exception.BadRequestException;
 import com.wanted.gold.exception.ErrorCode;
 import com.wanted.gold.exception.NotFoundException;
@@ -42,8 +43,10 @@ public class OrderService {
     // 주문 생성
     @Transactional
     public String createOrder(String accessToken, CreateOrderRequestDto requestDto) {
-        // 액세스토큰으로 회원 식별번호 가져오기
-        String userIdStr = authGrpcClient.getUserId(accessToken);
+        // 액세스토큰으로 회원 정보 가져오기
+        UserResponseDto userResponseDto = authGrpcClient.getUserIdAndRole(accessToken);
+        // 회원 식별번호 가져오기
+        String userIdStr = userResponseDto.userId();
         // String -> UUID 변환
         UUID userId = UUID.fromString(userIdStr);
         // 입력받은 금 종류로 product 찾기
