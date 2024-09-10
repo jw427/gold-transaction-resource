@@ -39,8 +39,12 @@ public class OrderController {
     public ResponseEntity<OrderListPaginationResponseDto<OrderListResponseDto>> orderList(@RequestParam(required = true) LocalDate date,
                                                                                           @RequestParam(required = true) OrderType type,
                                                                                           @RequestParam(defaultValue = "0") int offset,
-                                                                                          @RequestParam(defaultValue = "10") int limit) {
-        OrderListPaginationResponseDto<OrderListResponseDto> orderPage = orderService.getOrders(date, type, offset, limit);
+                                                                                          @RequestParam(defaultValue = "10") int limit,
+                                                                                          @RequestHeader(value = "Authorization") String token) {
+        if(token == null || !token.startsWith("Bearer "))
+            throw new UnauthorizedException(ErrorCode.UNAUTHORIZED);
+        String accessToken = token.split("Bearer ")[1];
+        OrderListPaginationResponseDto<OrderListResponseDto> orderPage = orderService.getOrders(date, type, offset, limit, accessToken);
         // 주문이 하나도 없을 경우
         if(orderPage.data().size() == 0)
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);

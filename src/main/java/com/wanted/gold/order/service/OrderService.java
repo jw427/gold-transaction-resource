@@ -107,10 +107,20 @@ public class OrderService {
 
     // 주문 전체 목록 조회
     @Transactional(readOnly = true)
-    public OrderListPaginationResponseDto<OrderListResponseDto> getOrders(LocalDate date, OrderType type, int offset, int limit) {
+    public OrderListPaginationResponseDto<OrderListResponseDto> getOrders(LocalDate date, OrderType type, int offset, int limit, String accessToken) {
+        // 액세스토큰으로 회원 정보 가져오기
+        UserResponseDto userResponseDto = authGrpcClient.getUserIdAndRole(accessToken);
+        Page<Order> orders;
         // 페이지 번호 offset과 한 페이지당 출력 개수인 limit
         Pageable pageable = PageRequest.of(offset, limit);
-        Page<Order> orders = orderRepository.findByCreatedAtDateAndAndOrderType(date, type, pageable);
+        // 관리자인 경우 모든 주문 목록 조회
+        if(userResponseDto.role().equals("ROLE_ADMIN")) {
+            orders = orderRepository.findByCreatedAtDateAndOrderType(date, type, pageable);
+            // 일반 회원인 경우 해당 회원의 주문 목록만 조회
+        } else {
+            UUID userId = UUID.fromString(userResponseDto.userId());
+            orders = orderRepository.findByCreatedAtAndOrderTypeAndUserId(date, type, userId, pageable);
+        }
         // dto 변환
         List<OrderListResponseDto> orderListResponseDtoList = orders.stream()
                 .map(list -> new OrderListResponseDto(list.getOrderStatus(), list.getTotalPrice(), list.getQuantity(), list.getUpdatedAt(), list.getProduct().getGoldType()))
