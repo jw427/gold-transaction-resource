@@ -37,10 +37,13 @@ public class OrderService {
     private final ProductRepository productRepository;
     private final PaymentRepository paymentRepository;
     private final AuthGrpcClient authGrpcClient;
+    private final OrderValidator orderValidator;
 
     // 주문 생성
     @Transactional
     public String createOrder(String accessToken, CreateOrderRequestDto requestDto) {
+        // 수량 소수점 검증하기
+        orderValidator.validateQuantity(requestDto.quantity());
         // 액세스토큰으로 회원 정보 가져오기
         UserResponseDto userResponseDto = authGrpcClient.getUserIdAndRole(accessToken);
         // 회원 식별번호 가져오기
