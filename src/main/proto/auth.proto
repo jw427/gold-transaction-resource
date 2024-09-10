@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.wanted.gold.grpc";
+option java_outer_classname = "AuthProto";
+
+message AuthRequest {
+  string accessToken = 1;
+}
+
+message AuthResponse {
+  string userId = 1;
+  string role = 2;
+}
+
+service AuthService {
+  rpc AuthCall (AuthRequest) returns (AuthResponse);
+}

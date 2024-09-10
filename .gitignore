@@ -268,3 +268,4 @@ gradle-app.setting
 
 src/main/generated
 .env*
+gradle.properties

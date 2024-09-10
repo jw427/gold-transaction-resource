@@ -13,3 +13,10 @@ spring:
         format_sql: true
     hibernate:
       ddl-auto: update
+
+server:
+  port: 9999
+
+grpc:
+  server:
+    port: 50052
