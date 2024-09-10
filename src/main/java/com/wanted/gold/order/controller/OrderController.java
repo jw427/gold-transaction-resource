@@ -53,8 +53,11 @@ public class OrderController {
 
     // 주문 상세 조회
     @GetMapping("/{orderId}")
-    public ResponseEntity<OrderDetailResponseDto> getOrder(@PathVariable Long orderId) {
-        OrderDetailResponseDto responseDto = orderService.getOrder(orderId);
+    public ResponseEntity<OrderDetailResponseDto> getOrder(@PathVariable Long orderId, @RequestHeader(value = "Authorization") String token) {
+        if(token == null || !token.startsWith("Bearer "))
+            throw new UnauthorizedException(ErrorCode.UNAUTHORIZED);
+        String accessToken = token.split("Bearer ")[1];
+        OrderDetailResponseDto responseDto = orderService.getOrder(orderId, accessToken);
         return ResponseEntity.ok().body(responseDto);
     }
 

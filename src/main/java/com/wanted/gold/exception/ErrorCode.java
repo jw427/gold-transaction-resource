@@ -10,6 +10,7 @@ public enum ErrorCode {
     // 기본
     BAD_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "유효하지 않은 접근입니다."),
+    FORBIDDEN(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
 
     // 주문
     QUANTITY_TOO_MANY(HttpStatus.BAD_REQUEST, "주문할 수 없는 수량입니다. 수량을 다시 확인해주세요."),

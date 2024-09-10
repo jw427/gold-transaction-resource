@@ -2,9 +2,7 @@ package com.wanted.gold.order.service;
 
 import com.wanted.gold.client.AuthGrpcClient;
 import com.wanted.gold.client.dto.UserResponseDto;
-import com.wanted.gold.exception.BadRequestException;
-import com.wanted.gold.exception.ErrorCode;
-import com.wanted.gold.exception.NotFoundException;
+import com.wanted.gold.exception.*;
 import com.wanted.gold.order.domain.*;
 import com.wanted.gold.order.dto.*;
 import com.wanted.gold.order.repository.DeliveryRepository;
@@ -156,10 +154,15 @@ public class OrderService {
     }
 
     // 주문 상세 조회
-    public OrderDetailResponseDto getOrder(Long orderId) {
+    public OrderDetailResponseDto getOrder(Long orderId, String accessToken) {
+        // 액세스토큰으로 회원 정보 가져오기
+        UserResponseDto userResponseDto = authGrpcClient.getUserIdAndRole(accessToken);
         // 주문 식별번호로 Order 객체 찾기
         Order order = orderRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.ORDER_NOT_FOUND));
+        // 일반 회원의 경우 본인 주문이 아닐 경우 조회 불가
+        if(userResponseDto.role().equals("ROLE_MEMBER") && !UUID.fromString(userResponseDto.userId()).equals(order.getUserId()))
+            throw new ForbiddenException(ErrorCode.FORBIDDEN);
         // 주문 식별번호로 Delivery 객체 찾기
         Delivery delivery = deliveryRepository.findTopByOrder_OrderIdOrderByDeliveryIdDesc(orderId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.DELIVERY_NOT_FOUND));
