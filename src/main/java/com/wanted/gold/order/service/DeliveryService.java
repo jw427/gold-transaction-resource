@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class DeliveryService {
@@ -59,10 +61,15 @@ public class DeliveryService {
     }
 
     @Transactional
-    public String modifyDelivery(Long deliveryId, ModifyDeliveryRequestDto requestDto) {
+    public String modifyDelivery(Long deliveryId, String accessToken, ModifyDeliveryRequestDto requestDto) {
         // 배송 식별번호로 delivery 객체 찾기
         Delivery delivery = deliveryRepository.findByDeliveryId(deliveryId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.DELIVERY_NOT_FOUND));
+        // 액세스토큰으로 회원 정보 가져오기
+        UserResponseDto userResponseDto = authGrpcClient.getUserIdAndRole(accessToken);
+        // 본인 주문이 아닐 경우 배송 정보 수정 불가
+        if(!UUID.fromString(userResponseDto.userId()).equals(delivery.getOrder().getUserId()))
+            throw new ForbiddenException(ErrorCode.FORBIDDEN);
         // 배송이 완료된 상태에서는 수정 불가
         if(delivery.getDeliveryStatus() != DeliveryStatus.PENDING)
             throw new ConflictException(ErrorCode.DELIVERY_MODIFY_FAILED);

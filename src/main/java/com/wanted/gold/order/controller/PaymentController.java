@@ -26,8 +26,11 @@ public class PaymentController {
 
     // 결제 정보 수정
     @PatchMapping("/{paymentId}")
-    public ResponseEntity<String> modifyPayment(@PathVariable Long paymentId, @RequestBody ModifyPaymentRequestDto requestDto) {
-        String response = paymentService.modifyPayment(paymentId, requestDto);
+    public ResponseEntity<String> modifyPayment(@PathVariable Long paymentId, @RequestHeader(value = "Authorization") String token, @RequestBody ModifyPaymentRequestDto requestDto) {
+        if(token == null || !token.startsWith("Bearer "))
+            throw new UnauthorizedException(ErrorCode.UNAUTHORIZED);
+        String accessToken = token.split("Bearer ")[1];
+        String response = paymentService.modifyPayment(paymentId, accessToken, requestDto);
         return ResponseEntity.ok().body(response);
     }
 }

@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class PaymentService {
@@ -54,10 +56,15 @@ public class PaymentService {
     }
 
     @Transactional
-    public String modifyPayment(Long paymentId, ModifyPaymentRequestDto requestDto) {
+    public String modifyPayment(Long paymentId, String accessToken, ModifyPaymentRequestDto requestDto) {
         // 결제 식별번호로 payment 객체 찾기
         Payment payment = paymentRepository.findByPaymentId(paymentId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PAYMENT_NOT_FOUND));
+        // 액세스토큰으로 회원 정보 가져오기
+        UserResponseDto userResponseDto = authGrpcClient.getUserIdAndRole(accessToken);
+        // 본인 주문이 아닐 경우 결제 정보 수정 불가
+        if(!UUID.fromString(userResponseDto.userId()).equals(payment.getOrder().getUserId()))
+            throw new ForbiddenException(ErrorCode.FORBIDDEN);
         // 결제가 완료된 상태에서는 수정 불가
         if(payment.getPaymentStatus() != PaymentStatus.PENDING)
             throw new ConflictException(ErrorCode.PAYMENT_MODIFY_FAILED);

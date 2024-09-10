@@ -26,8 +26,11 @@ public class DeliveryController {
 
     // 배송 정보 수정
     @PatchMapping("/{deliveryId}")
-    public ResponseEntity<String> modifyDelivery(@PathVariable Long deliveryId, @RequestBody ModifyDeliveryRequestDto requestDto) {
-        String response = deliveryService.modifyDelivery(deliveryId, requestDto);
+    public ResponseEntity<String> modifyDelivery(@PathVariable Long deliveryId, @RequestHeader(value = "Authorization") String token, @RequestBody ModifyDeliveryRequestDto requestDto) {
+        if(token == null || !token.startsWith("Bearer "))
+            throw new UnauthorizedException(ErrorCode.UNAUTHORIZED);
+        String accessToken = token.split("Bearer ")[1];
+        String response = deliveryService.modifyDelivery(deliveryId, accessToken, requestDto);
         return ResponseEntity.ok().body(response);
     }
 }
