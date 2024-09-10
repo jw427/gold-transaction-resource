@@ -62,7 +62,7 @@ public class PaymentService {
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PAYMENT_NOT_FOUND));
         // 액세스토큰으로 회원 정보 가져오기
         UserResponseDto userResponseDto = authGrpcClient.getUserIdAndRole(accessToken);
-        // 본인 주문이 아닐 결제 정보 수정 불가
+        // 본인 주문이 아닐 경우 결제 정보 수정 불가
         if(!UUID.fromString(userResponseDto.userId()).equals(payment.getOrder().getUserId()))
             throw new ForbiddenException(ErrorCode.FORBIDDEN);
         // 결제가 완료된 상태에서는 수정 불가
