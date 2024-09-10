@@ -10,6 +10,7 @@ message AuthRequest {
 
 message AuthResponse {
   string userId = 1;
+  string role = 2;
 }
 
 service AuthService {

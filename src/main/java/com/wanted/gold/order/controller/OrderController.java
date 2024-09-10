@@ -1,5 +1,7 @@
 package com.wanted.gold.order.controller;
 
+import com.wanted.gold.exception.ErrorCode;
+import com.wanted.gold.exception.UnauthorizedException;
 import com.wanted.gold.order.domain.Order;
 import com.wanted.gold.order.domain.OrderType;
 import com.wanted.gold.order.dto.CreateOrderRequestDto;
@@ -26,7 +28,7 @@ public class OrderController {
     @PostMapping("")
     public ResponseEntity<String> createOrder(@RequestHeader(value = "Authorization") String token, @Valid @RequestBody CreateOrderRequestDto requestDto) {
         if(token == null || !token.startsWith("Bearer "))
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효하지 않은 접근입니다.");
+            throw new UnauthorizedException(ErrorCode.UNAUTHORIZED);
         String accessToken = token.split("Bearer ")[1];
         String response = orderService.createOrder(accessToken, requestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
