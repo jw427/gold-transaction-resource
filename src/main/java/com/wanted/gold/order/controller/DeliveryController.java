@@ -1,5 +1,7 @@
 package com.wanted.gold.order.controller;
 
+import com.wanted.gold.exception.ErrorCode;
+import com.wanted.gold.exception.UnauthorizedException;
 import com.wanted.gold.order.dto.ModifyDeliveryRequestDto;
 import com.wanted.gold.order.service.DeliveryService;
 import lombok.RequiredArgsConstructor;
@@ -14,8 +16,11 @@ public class DeliveryController {
 
     // 배송 상태 수정 - 발송 완료 또는 수령 완료
     @PatchMapping("/{deliveryId}/complete")
-    public ResponseEntity<String> completeDelivery(@PathVariable Long deliveryId) {
-        String response = deliveryService.completeDelivery(deliveryId);
+    public ResponseEntity<String> completeDelivery(@PathVariable Long deliveryId, @RequestHeader(value = "Authorization") String token) {
+        if(token == null || !token.startsWith("Bearer "))
+            throw new UnauthorizedException(ErrorCode.UNAUTHORIZED);
+        String accessToken = token.split("Bearer ")[1];
+        String response = deliveryService.completeDelivery(deliveryId, accessToken);
         return ResponseEntity.ok().body(response);
     }
 
