@@ -1,9 +1,8 @@
 package com.wanted.gold.order.service;
 
-import com.wanted.gold.exception.BadRequestException;
-import com.wanted.gold.exception.ConflictException;
-import com.wanted.gold.exception.ErrorCode;
-import com.wanted.gold.exception.NotFoundException;
+import com.wanted.gold.client.AuthGrpcClient;
+import com.wanted.gold.client.dto.UserResponseDto;
+import com.wanted.gold.exception.*;
 import com.wanted.gold.order.domain.*;
 import com.wanted.gold.order.dto.ModifyPaymentRequestDto;
 import com.wanted.gold.order.repository.PaymentRepository;
@@ -15,11 +14,17 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class PaymentService {
     private final PaymentRepository paymentRepository;
+    private final AuthGrpcClient authGrpcClient;
 
     @Transactional
-    public String completePayment(Long paymentId) {
+    public String completePayment(Long paymentId, String accessToken) {
         // 출력 메시지
         String message;
+        // 액세스토큰으로 회원 정보 가져오기
+        UserResponseDto userResponseDto = authGrpcClient.getUserIdAndRole(accessToken);
+        // 일반 회원의 경우 결제 상태 변경 불가
+        if(userResponseDto.role().equals("ROLE_MEMBER"))
+            throw new ForbiddenException(ErrorCode.FORBIDDEN);
         // 결제 식별번호로 payment 객체 찾기
         Payment payment = paymentRepository.findByPaymentId(paymentId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PAYMENT_NOT_FOUND));

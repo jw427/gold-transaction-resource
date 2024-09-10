@@ -1,9 +1,8 @@
 package com.wanted.gold.order.service;
 
-import com.wanted.gold.exception.BadRequestException;
-import com.wanted.gold.exception.ConflictException;
-import com.wanted.gold.exception.ErrorCode;
-import com.wanted.gold.exception.NotFoundException;
+import com.wanted.gold.client.AuthGrpcClient;
+import com.wanted.gold.client.dto.UserResponseDto;
+import com.wanted.gold.exception.*;
 import com.wanted.gold.order.domain.*;
 import com.wanted.gold.order.dto.ModifyDeliveryRequestDto;
 import com.wanted.gold.order.repository.DeliveryRepository;
@@ -16,11 +15,17 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class DeliveryService {
     private final DeliveryRepository deliveryRepository;
+    private final AuthGrpcClient authGrpcClient;
 
     @Transactional
-    public String completeDelivery(Long deliveryId) {
+    public String completeDelivery(Long deliveryId, String accessToken) {
         // 출력 메시지
         String message;
+        // 액세스토큰으로 회원 정보 가져오기
+        UserResponseDto userResponseDto = authGrpcClient.getUserIdAndRole(accessToken);
+        // 일반 회원의 경우 배송 상태 변경 불가
+        if(userResponseDto.role().equals("ROLE_MEMBER"))
+            throw new ForbiddenException(ErrorCode.FORBIDDEN);
         // 배송 식별번호로 delivery 객체 찾기
         Delivery delivery = deliveryRepository.findByDeliveryId(deliveryId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.DELIVERY_NOT_FOUND));
