@@ -2,9 +2,7 @@ package com.wanted.gold.order.service;
 
 import com.wanted.gold.client.AuthGrpcClient;
 import com.wanted.gold.client.dto.UserResponseDto;
-import com.wanted.gold.exception.BadRequestException;
-import com.wanted.gold.exception.ErrorCode;
-import com.wanted.gold.exception.NotFoundException;
+import com.wanted.gold.exception.*;
 import com.wanted.gold.order.domain.*;
 import com.wanted.gold.order.dto.*;
 import com.wanted.gold.order.repository.DeliveryRepository;
@@ -107,10 +105,20 @@ public class OrderService {
 
     // 주문 전체 목록 조회
     @Transactional(readOnly = true)
-    public OrderListPaginationResponseDto<OrderListResponseDto> getOrders(LocalDate date, OrderType type, int offset, int limit) {
+    public OrderListPaginationResponseDto<OrderListResponseDto> getOrders(LocalDate date, OrderType type, int offset, int limit, String accessToken) {
+        // 액세스토큰으로 회원 정보 가져오기
+        UserResponseDto userResponseDto = authGrpcClient.getUserIdAndRole(accessToken);
+        Page<Order> orders;
         // 페이지 번호 offset과 한 페이지당 출력 개수인 limit
         Pageable pageable = PageRequest.of(offset, limit);
-        Page<Order> orders = orderRepository.findByCreatedAtDateAndAndOrderType(date, type, pageable);
+        // 관리자인 경우 모든 주문 목록 조회
+        if(userResponseDto.role().equals("ROLE_ADMIN")) {
+            orders = orderRepository.findByCreatedAtDateAndOrderType(date, type, pageable);
+            // 일반 회원인 경우 해당 회원의 주문 목록만 조회
+        } else {
+            UUID userId = UUID.fromString(userResponseDto.userId());
+            orders = orderRepository.findByCreatedAtAndOrderTypeAndUserId(date, type, userId, pageable);
+        }
         // dto 변환
         List<OrderListResponseDto> orderListResponseDtoList = orders.stream()
                 .map(list -> new OrderListResponseDto(list.getOrderStatus(), list.getTotalPrice(), list.getQuantity(), list.getUpdatedAt(), list.getProduct().getGoldType()))
@@ -146,10 +154,15 @@ public class OrderService {
     }
 
     // 주문 상세 조회
-    public OrderDetailResponseDto getOrder(Long orderId) {
+    public OrderDetailResponseDto getOrder(Long orderId, String accessToken) {
+        // 액세스토큰으로 회원 정보 가져오기
+        UserResponseDto userResponseDto = authGrpcClient.getUserIdAndRole(accessToken);
         // 주문 식별번호로 Order 객체 찾기
         Order order = orderRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.ORDER_NOT_FOUND));
+        // 일반 회원의 경우 본인 주문이 아닐 경우 조회 불가
+        if(userResponseDto.role().equals("ROLE_MEMBER") && !UUID.fromString(userResponseDto.userId()).equals(order.getUserId()))
+            throw new ForbiddenException(ErrorCode.FORBIDDEN);
         // 주문 식별번호로 Delivery 객체 찾기
         Delivery delivery = deliveryRepository.findTopByOrder_OrderIdOrderByDeliveryIdDesc(orderId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.DELIVERY_NOT_FOUND));
@@ -190,10 +203,15 @@ public class OrderService {
 
     // 주문 삭제
     @Transactional
-    public void deleteOrder(Long orderId) {
+    public void deleteOrder(Long orderId, String accessToken) {
+        // 액세스토큰으로 회원 정보 가져오기
+        UserResponseDto userResponseDto = authGrpcClient.getUserIdAndRole(accessToken);
         // 주문 식별번호로 Order 객체 찾기
         Order order = orderRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.ORDER_NOT_FOUND));
+        // 본인 주문이 아닐 경우 삭제 불가
+        if(!UUID.fromString(userResponseDto.userId()).equals(order.getUserId()))
+            throw new ForbiddenException(ErrorCode.FORBIDDEN);
         // 주문 상태가 입금 또는 송금이 완료된 상태일 경우 삭제 불가 - 주문만 한 상태이거나 배송까지 완료됐을 때는 삭제 가능
         if(order.getOrderStatus() == OrderStatus.PAYMENT_COMPLETED || order.getOrderStatus() == OrderStatus.PAYMENT_SENT)
             throw new BadRequestException(ErrorCode.ORDER_DELETE_FAILED);
