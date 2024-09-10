@@ -203,10 +203,15 @@ public class OrderService {
 
     // 주문 삭제
     @Transactional
-    public void deleteOrder(Long orderId) {
+    public void deleteOrder(Long orderId, String accessToken) {
+        // 액세스토큰으로 회원 정보 가져오기
+        UserResponseDto userResponseDto = authGrpcClient.getUserIdAndRole(accessToken);
         // 주문 식별번호로 Order 객체 찾기
         Order order = orderRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.ORDER_NOT_FOUND));
+        // 본인 주문이 아닐 경우 삭제 불가
+        if(!UUID.fromString(userResponseDto.userId()).equals(order.getUserId()))
+            throw new ForbiddenException(ErrorCode.FORBIDDEN);
         // 주문 상태가 입금 또는 송금이 완료된 상태일 경우 삭제 불가 - 주문만 한 상태이거나 배송까지 완료됐을 때는 삭제 가능
         if(order.getOrderStatus() == OrderStatus.PAYMENT_COMPLETED || order.getOrderStatus() == OrderStatus.PAYMENT_SENT)
             throw new BadRequestException(ErrorCode.ORDER_DELETE_FAILED);

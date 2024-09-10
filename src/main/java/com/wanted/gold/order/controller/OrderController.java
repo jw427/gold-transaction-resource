@@ -63,8 +63,11 @@ public class OrderController {
 
     // 주문 삭제
     @DeleteMapping("/{orderId}")
-    public ResponseEntity<Void> deleteOrder(@PathVariable Long orderId) {
-        orderService.deleteOrder(orderId);
+    public ResponseEntity<Void> deleteOrder(@PathVariable Long orderId, @RequestHeader(value = "Authorization") String token) {
+        if(token == null || !token.startsWith("Bearer "))
+            throw new UnauthorizedException(ErrorCode.UNAUTHORIZED);
+        String accessToken = token.split("Bearer ")[1];
+        orderService.deleteOrder(orderId, accessToken);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
