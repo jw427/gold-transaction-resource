@@ -22,14 +22,14 @@
 </br>
 
 ## 🏷️ 목차
-1. [🏃‍♀️ Quick Start](#--quick-start)
-2. [📦 ERD](#--erd)
-3. [📁 디렉터리 구조](#--디렉터리-구조)
-4. [💌 API 명세](#--api-명세)
+1. [🏃‍♀️ Quick Start](#quick-start)
+2. [📦 ERD](#erd)
+3. [📁 디렉터리 구조](#디렉터리-구조)
+4. [💌 API 명세](#api-명세)
 
 </br>
 
-## 🏃‍♀️ Quick Start
+## 🏃‍♀️ Quick Start <a id="quick-start"></a>
 1. .env 파일
 - 자원 서버
 ```
@@ -62,11 +62,11 @@ REFRESH_TOKEN_EXPIRATION=리프레시 토큰 만료 시간
 </details>
 </br>
 
-## 📦 ERD
+## 📦 ERD <a id="erd"></a>
 ![Untitled](https://github.com/user-attachments/assets/02381a86-c5b9-4c33-9015-5c6ce39bbf07)
 </br>
 
-## 📁 디렉터리 구조
+## 📁 디렉터리 구조 <a id="디렉터리-구조"></a>
 <details>
 <summary>자원 서버 디렉터리 구조</summary>
 <div markdown="1">
@@ -259,7 +259,7 @@ src
 
 </br>
 
-## 💌 API 명세
+## 💌 API 명세 <a id="api-명세"></a>
 ### 👉 [자원 서버 API 명세](https://documenter.getpostman.com/view/29531239/2sAXqmAQkQ)
 ### 👉 [인증 서버 API 명세](https://documenter.getpostman.com/view/29531239/2sAXqmA5Lp)
 </br>
