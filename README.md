@@ -9,7 +9,7 @@
 1. RESTful API를 활용하여 구매, 판매 주문 CRUD를 수행하는 서버 A 구현
 2. 서버 A와 gRPC를 통해 소통하며, 인증만을 담당하는 서버 B 구현
 
-### 👉 [인증 서버](https://github.com/jw427/gold-transaction-auth)
+### 👉 [인증 서버 Repository](https://github.com/jw427/gold-transaction-auth)
 </br>
 
 ## 🛠️ 기술 스택
@@ -330,4 +330,30 @@ src
 ## 💌 API 명세 <a id="api-명세"></a>
 ### 👉 [자원 서버 API 명세](https://documenter.getpostman.com/view/29531239/2sAXqmAQkQ)
 ### 👉 [인증 서버 API 명세](https://documenter.getpostman.com/view/29531239/2sAXqmA5Lp)
+<details>
+<summary>
+  
+#### 🔗 Swagger API 문서
+  
+</summary>
+<div markdown="1">
+<ul>
+<div>
+  
+#### 서버 실행 후 접속 가능합니다.
+  
+</div>
+<div>
+  
+  #### 👉 [자원 서버 Swagger API 문서](http://localhost:9999/swagger-ui/index.html#)
+  
+</div>
+<div>
+  
+  #### 👉 [인증 서버 Swagger API 문서](http://localhost:8888/swagger-ui/index.html#)
+  
+</div>
+</ul>
+</div>
+</details>
 </br>
